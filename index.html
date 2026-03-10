@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Smart Resume Builder Pro</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<header>
+<h1>Smart Resume Builder</h1>
+
+<button onclick="toggleMode()" style="width:200px">
+Dark / Light Mode
+</button>
+</header>
+
+<div class="container">
+
+<div class="form">
+
+<h3>Enter Details</h3>
+
+<input id="name" placeholder="Name" onkeyup="update()">
+<input id="email" placeholder="Email" onkeyup="update()">
+<input id="phone" placeholder="Phone" onkeyup="update()">
+
+<h4>Professional Links</h4>
+
+<input id="linkedin" placeholder="LinkedIn Profile URL" onkeyup="update()">
+<input id="github" placeholder="GitHub Profile URL" onkeyup="update()">
+
+<textarea id="summaryInput" placeholder="Professional Summary" onkeyup="update()"></textarea>
+
+<textarea id="education" placeholder="Education" onkeyup="update()"></textarea>
+
+<textarea id="skills" placeholder="Skills (comma separated)" onkeyup="update()"></textarea>
+
+<h4>Experience</h4>
+<div id="experienceContainer"></div>
+<button onclick="addExperience()">Add Experience</button>
+
+<h4>Certificates</h4>
+<div id="certificateContainer"></div>
+<button onclick="addCertificate()">Add Certificate</button>
+
+<label>Upload Profile Photo</label>
+<input type="file" accept="image/*" onchange="loadPhoto(event)">
+
+<h4>Camera Photo</h4>
+
+<video id="camera" autoplay></video>
+<button onclick="startCamera()">Open Camera</button>
+<button onclick="capturePhoto()">Capture Photo</button>
+
+<canvas id="canvas" style="display:none"></canvas>
+
+<button onclick="analyzeResume()">Analyze Resume (AI)</button>
+
+<button onclick="shareResume()">Share Resume Link</button>
+
+<button onclick="window.print()">Download Resume</button>
+
+<h4>Resume Strength</h4>
+
+<div class="progress">
+<div id="strength"></div>
+</div>
+
+<p id="scoreText"></p>
+
+<h4>ATS Score</h4>
+<p id="atsScore"></p>
+
+<h4>Spell Checker</h4>
+<p id="spellCheck"></p>
+
+<h4>AI Resume Feedback</h4>
+<p id="aiFeedback"></p>
+
+</div>
+
+<div class="resume">
+
+<center>
+<img id="photo" class="profile">
+</center>
+
+<h2 id="rname" class="name">Your Name</h2>
+
+<p id="remail"></p>
+<p id="rphone"></p>
+<p><a id="rlinkedin" target="_blank"></a></p>
+<p><a id="rgithub" target="_blank"></a></p>
+
+<div class="section">
+<h3>Summary</h3>
+<p id="summary"></p>
+</div>
+
+<div class="section">
+<h3>Education</h3>
+<p id="reducation"></p>
+</div>
+
+<div class="section">
+<h3>Skills</h3>
+<p id="rskills"></p>
+</div>
+
+<div class="section">
+<h3>Experience</h3>
+<div id="rexperience"></div>
+</div>
+
+<div class="section">
+<h3>Certificates</h3>
+<div id="rcertificates"></div>
+</div>
+
+</div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
