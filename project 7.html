@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Smart Resume Builder Pro</title>
+
+<style>
+
+body{
+font-family:Arial;
+margin:0;
+background:#f0f2f5;
+}
+
+header{
+background:#222;
+color:white;
+text-align:center;
+padding:15px;
+}
+
+.container{
+display:flex;
+flex-wrap:wrap;
+gap:20px;
+padding:20px;
+justify-content:center;
+}
+
+.form,.resume{
+background:white;
+padding:20px;
+width:360px;
+box-shadow:0 0 10px gray;
+border-radius:10px;
+}
+
+.resume{
+width:600px;
+border:5px solid #7bb6d9;
+}
+
+input,textarea{
+width:100%;
+padding:8px;
+margin:8px 0;
+}
+
+button{
+padding:10px;
+border:none;
+background:#007bff;
+color:white;
+cursor:pointer;
+margin-top:5px;
+width:100%;
+}
+
+button:hover{
+background:#0056b3;
+}
+
+.progress{
+height:10px;
+background:#ddd;
+margin-top:10px;
+}
+
+#strength{
+height:10px;
+background:#4CAF50;
+width:0%;
+}
+
+.dark{
+background:#1e1e1e;
+color:white;
+}
+
+.dark .form,.dark .resume{
+background:#2d2d2d;
+color:white;
+}
+
+.profile{
+width:150px;
+height:150px;
+border-radius:50%;
+object-fit:cover;
+border:6px solid #7bb6d9;
+margin-bottom:10px;
+}
+
+.section{
+background:#e9edf1;
+padding:12px;
+margin-top:15px;
+border-radius:6px;
+border-left:6px solid #7bb6d9;
+}
+
+.section h3{
+margin-top:0;
+}
+
+.expBox{
+border:1px solid #ccc;
+padding:10px;
+margin-top:10px;
+border-radius:6px;
+}
+
+video{
+width:100%;
+margin-top:10px;
+border-radius:8px;
+}
+
+a{
+color:#007bff;
+text-decoration:none;
+}
+
+.name{
+border-bottom:3px solid #7bb6d9;
+padding-bottom:8px;
+margin-bottom:15px;
+}
+
+/* PRINT ONLY RESUME */
+
+@media print{
+
+body *{
+visibility:hidden;
+}
+
+.resume, .resume *{
+visibility:visible;
+}
+
+.resume{
+position:absolute;
+left:0;
+top:0;
+width:100%;
+border:none;
+box-shadow:none;
+}
+
+header{
+display:none;
+}
+
+.form{
+display:none;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h1>Smart Resume Builder</h1>
+
+<button onclick="toggleMode()" style="width:200px">
+Dark / Light Mode
+</button>
+
+</header>
+
+<div class="container">
+
+<div class="form">
+
+<h3>Enter Details</h3>
+
+<input id="name" placeholder="Name" onkeyup="update()">
+<input id="email" placeholder="Email" onkeyup="update()">
+<input id="phone" placeholder="Phone" onkeyup="update()">
+
+<h4>Professional Links</h4>
+
+<input id="linkedin" placeholder="LinkedIn Profile URL" onkeyup="update()">
+<input id="github" placeholder="GitHub Profile URL" onkeyup="update()">
+
+<!-- SUMMARY ADDED -->
+<textarea id="summaryInput" placeholder="Professional Summary" onkeyup="update()"></textarea>
+
+<textarea id="education" placeholder="Education" onkeyup="update()"></textarea>
+
+<textarea id="skills" placeholder="Skills (comma separated)" onkeyup="update()"></textarea>
+
+<h4>Experience</h4>
+<div id="experienceContainer"></div>
+<button onclick="addExperience()">Add Experience</button>
+
+<h4>Certificates</h4>
+<div id="certificateContainer"></div>
+<button onclick="addCertificate()">Add Certificate</button>
+
+<label>Upload Profile Photo</label>
+<input type="file" accept="image/*" onchange="loadPhoto(event)">
+
+<h4>Camera Photo</h4>
+
+<video id="camera" autoplay></video>
+<button onclick="startCamera()">Open Camera</button>
+<button onclick="capturePhoto()">Capture Photo</button>
+
+<canvas id="canvas" style="display:none"></canvas>
+
+<button onclick="analyzeResume()">Analyze Resume (AI)</button>
+
+<button onclick="shareResume()">Share Resume Link</button>
+
+<button onclick="window.print()">Download Resume</button>
+
+<h4>Resume Strength</h4>
+
+<div class="progress">
+<div id="strength"></div>
+</div>
+
+<p id="scoreText"></p>
+
+<h4>ATS Score</h4>
+<p id="atsScore"></p>
+
+<h4>Spell Checker</h4>
+<p id="spellCheck"></p>
+
+<h4>AI Resume Feedback</h4>
+<p id="aiFeedback"></p>
+
+</div>
+
+<div class="resume">
+
+<center>
+<img id="photo" class="profile">
+</center>
+
+<h2 id="rname" class="name">Your Name</h2>
+
+<p id="remail"></p>
+<p id="rphone"></p>
+<p><a id="rlinkedin" target="_blank"></a></p>
+<p><a id="rgithub" target="_blank"></a></p>
+
+<div class="section">
+<h3>Summary</h3>
+<p id="summary"></p>
+</div>
+
+<div class="section">
+<h3>Education</h3>
+<p id="reducation"></p>
+</div>
+
+<div class="section">
+<h3>Skills</h3>
+<p id="rskills"></p>
+</div>
+
+<div class="section">
+<h3>Experience</h3>
+<div id="rexperience"></div>
+</div>
+
+<div class="section">
+<h3>Certificates</h3>
+<div id="rcertificates"></div>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+let expCount=0
+let certCount=0
+let stream
+
+function addExperience(){
+
+expCount++
+
+let div=document.createElement("div")
+div.className="expBox"
+
+div.innerHTML=`
+<input placeholder="Company" id="company${expCount}" onkeyup="update()">
+<input placeholder="Years" id="years${expCount}" onkeyup="update()">
+<input placeholder="Role" id="role${expCount}" onkeyup="update()">
+`
+
+document.getElementById("experienceContainer").appendChild(div)
+
+}
+
+function addCertificate(){
+
+certCount++
+
+let div=document.createElement("div")
+div.className="expBox"
+
+div.innerHTML=`
+<input placeholder="Certificate Name" id="cert${certCount}" onkeyup="update()">
+<input placeholder="Organization" id="certOrg${certCount}" onkeyup="update()">
+`
+
+document.getElementById("certificateContainer").appendChild(div)
+
+}
+
+function update(){
+
+let name=document.getElementById("name").value
+let email=document.getElementById("email").value
+let phone=document.getElementById("phone").value
+let linkedin=document.getElementById("linkedin").value
+let github=document.getElementById("github").value
+let summary=document.getElementById("summaryInput").value
+let edu=document.getElementById("education").value
+let skills=document.getElementById("skills").value
+
+document.getElementById("rname").innerText=name
+document.getElementById("remail").innerText=email
+document.getElementById("rphone").innerText=phone
+
+document.getElementById("rlinkedin").href=linkedin
+document.getElementById("rlinkedin").innerText=linkedin ? "LinkedIn Profile" : ""
+
+document.getElementById("rgithub").href=github
+document.getElementById("rgithub").innerText=github ? "GitHub Profile" : ""
+
+document.getElementById("summary").innerText=summary
+document.getElementById("reducation").innerText=edu
+document.getElementById("rskills").innerText=skills
+
+let expHTML=""
+
+for(let i=1;i<=expCount;i++){
+
+let c=document.getElementById("company"+i)?.value || ""
+let y=document.getElementById("years"+i)?.value || ""
+let r=document.getElementById("role"+i)?.value || ""
+
+if(c||y||r){
+expHTML+=`<p><b>${c}</b> (${y}) - ${r}</p>`
+}
+
+}
+
+document.getElementById("rexperience").innerHTML=expHTML
+
+let certHTML=""
+
+for(let i=1;i<=certCount;i++){
+
+let c=document.getElementById("cert"+i)?.value || ""
+let o=document.getElementById("certOrg"+i)?.value || ""
+
+if(c||o){
+certHTML+=`<p><b>${c}</b> - ${o}</p>`
+}
+
+}
+
+document.getElementById("rcertificates").innerHTML=certHTML
+
+calculateScore()
+checkATS()
+spellCheck()
+
+}
+
+function calculateScore(){
+
+let score=0
+let fields=["name","email","phone","education","skills"]
+
+fields.forEach(id=>{
+if(document.getElementById(id).value!=""){
+score+=20
+}
+})
+
+document.getElementById("strength").style.width=score+"%"
+document.getElementById("scoreText").innerHTML="Resume Score: <b>"+score+"/100</b>"
+
+}
+
+function checkATS(){
+
+let skills=document.getElementById("skills").value.toLowerCase()
+let keywords=["html","css","javascript","react","java","python","sql"]
+
+let found=0
+
+keywords.forEach(k=>{
+if(skills.includes(k)) found++
+})
+
+let score=(found/keywords.length)*100
+
+document.getElementById("atsScore").innerHTML="ATS Match Score: <b>"+Math.round(score)+"%</b>"
+
+}
+
+function spellCheck(){
+
+let text=document.getElementById("education").value
+let mistakes=[]
+
+if(text.includes("teh")) mistakes.push("teh → the")
+if(text.includes("recieve")) mistakes.push("recieve → receive")
+if(text.includes("adress")) mistakes.push("adress → address")
+
+document.getElementById("spellCheck").innerHTML=
+mistakes.length ? "Possible typos:<br>"+mistakes.join("<br>") : "No spelling issues detected"
+
+}
+
+function analyzeResume(){
+
+let feedback=[]
+
+let email=document.getElementById("email").value
+let phone=document.getElementById("phone").value
+let skills=document.getElementById("skills").value
+let education=document.getElementById("education").value
+
+if(!email.includes("@")){
+feedback.push("⚠ Use a valid professional email")
+}
+
+if(phone.length<10){
+feedback.push("⚠ Phone number may be incomplete")
+}
+
+if(skills.split(",").length<3){
+feedback.push("⚠ Add more technical skills")
+}else{
+feedback.push("✔ Good skill diversity")
+}
+
+if(education.length<20){
+feedback.push("⚠ Education description too short")
+}else{
+feedback.push("✔ Education section looks good")
+}
+
+document.getElementById("aiFeedback").innerHTML=feedback.join("<br>")
+
+}
+
+function shareResume(){
+
+let data={
+name:document.getElementById("name").value,
+email:document.getElementById("email").value
+}
+
+let encoded=btoa(JSON.stringify(data))
+let link=location.href.split("?")[0]+"?resume="+encoded
+
+navigator.clipboard.writeText(link)
+
+alert("Share link copied to clipboard!")
+
+}
+
+function toggleMode(){
+document.body.classList.toggle("dark")
+}
+
+function loadPhoto(event){
+document.getElementById("photo").src=URL.createObjectURL(event.target.files[0])
+}
+
+function startCamera(){
+
+navigator.mediaDevices.getUserMedia({video:true})
+.then(function(s){
+
+stream=s
+document.getElementById("camera").srcObject=s
+
+})
+.catch(()=>{
+alert("Camera permission denied")
+})
+
+}
+
+function capturePhoto(){
+
+let video=document.getElementById("camera")
+let canvas=document.getElementById("canvas")
+let ctx=canvas.getContext("2d")
+
+canvas.width=video.videoWidth
+canvas.height=video.videoHeight
+
+ctx.drawImage(video,0,0)
+
+document.getElementById("photo").src=canvas.toDataURL("image/png")
+
+stream.getTracks().forEach(track=>track.stop())
+
+}
+
+</script>
+
+</body>
+</html>
